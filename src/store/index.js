@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
-
+import { usermodule } from "./user/usermodule.js";
 Vue.use(Vuex);
 
 export default new Vuex.Store({
@@ -8,5 +8,7 @@ export default new Vuex.Store({
   getters: {},
   mutations: {},
   actions: {},
-  modules: {},
+  modules: {
+    user: usermodule,
+  },
 });
