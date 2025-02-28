@@ -34,8 +34,9 @@ jobs:
 
       - name: 构建项目
         run: yarn build
-      - name:部署到GitHub Pages
-        if:github.ref=='ref/heads/develop'
+
+      - name: 部署到GitHub Pages
+        if: github.ref=='refs/heads/develop'
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: dist # Vue 项目构建输出目录
