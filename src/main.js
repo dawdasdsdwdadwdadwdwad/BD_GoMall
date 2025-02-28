@@ -4,8 +4,8 @@ import router from "./router";
 import store from "./store";
 import ElementUI from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
-if (process.env.NODE_ENV === "development") {
-  require("../Mock");
+if (process.env.VUE_APP_USE_MOCK === "true") {
+  require("./Mock");
 }
 Vue.use(ElementUI);
 Vue.config.productionTip = false;
