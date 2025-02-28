@@ -6,7 +6,10 @@ module.exports = defineConfig({
     // 确保在生产环境中也能正常使用 Mock.js
     devtool: "source-map",
   },
-  publicPath: "./",
+  publicPath:
+    process.env.NODE_ENV === "production"
+      ? "/BD_GoMall/" // 替换为您的GitHub仓库名称
+      : "/",
   outputDir: "dist",
   assetsDir: "static",
 });
