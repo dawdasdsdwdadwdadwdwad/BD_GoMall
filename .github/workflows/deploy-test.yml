@@ -1,0 +1,36 @@
+name: 部署到测试环境
+
+on:
+  push:
+    branches: [ develop ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: 设置 Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+        cache: 'yarn'
+    
+    - name: 安装依赖
+      run: yarn install
+    
+    - name: 代码检查
+      run: yarn lint
+    
+    - name: 构建项目
+      run: yarn build
+    
+    - name: 部署到测试服务器
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./dist/
+        server-dir: /public_html/test/
