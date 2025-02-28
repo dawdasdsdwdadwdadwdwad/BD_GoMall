@@ -9,6 +9,9 @@
   },
   "dependencies": {
     "core-js": "^3.8.3",
+    "element-ui": "^2.15.14",
+    "js-cookie": "^3.0.5",
+    "mockjs": "^1.1.0",
     "vue": "^2.6.14",
     "vue-router": "^3.5.1",
     "vuex": "^3.6.2"
@@ -26,7 +29,9 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-vue": "^8.0.3",
     "lint-staged": "^11.1.2",
+    "node-sass": "^9.0.0",
     "prettier": "^2.4.1",
+    "sass-loader": "^16.0.5",
     "vue-template-compiler": "^2.6.14"
   },
   "gitHooks": {
