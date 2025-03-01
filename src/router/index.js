@@ -59,6 +59,16 @@ const routes = [
     title: "购物车",
     component: () => import("../views/shoppingcar/ShoppingCar.vue"),
     meta: {
+      requireAuth: false,
+      showHeader: false,
+      showFooter: true,
+    },
+  },
+  {
+    path: "/checkout",
+    title: "结算",
+    component: () => import("../views/checkout/CheckoutOrder.vue"),
+    meta: {
       requireAuth: true,
       showHeader: false,
       showFooter: true,
