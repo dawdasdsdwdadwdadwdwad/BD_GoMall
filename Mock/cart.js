@@ -62,16 +62,18 @@ Mock.mock(new RegExp("/api/cart/get\\?userId=\\d+"), "get", (options) => {
   // 获取用户购物车
   const userCart = cartStorage[userId] || [];
 
-  // 为每个购物车项添加商品信息
+  // 从productData中获取商品信息
+  const { productData } = require("./product");
   const cartWithProductInfo = userCart.map((item) => {
+    const product = productData.list.find((p) => p.id === item.ProductID) || {
+      id: item.ProductID,
+      title: "未知商品",
+      price: 0,
+      image: "",
+    };
     return {
       ...item,
-      product: Mock.mock({
-        id: item.ProductID,
-        title: "@ctitle(5, 10)",
-        price: "@float(10, 1000, 2, 2)",
-        image: "@image('200x200', '#FF6600')",
-      }),
+      product,
     };
   });
 

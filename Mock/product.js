@@ -5,11 +5,11 @@ const productData = Mock.mock({
   "list|20": [
     {
       "id|+1": 1,
-      title: "@ctitle(5, 10)",
+      title: "@ctitle(2, 6)",
       description: "@cparagraph(1, 3)",
-      "price|100-10000": 100,
+      "price|1-10000": 100,
       "stock|10-100": 10,
-      image: '@image("200x200", "#FF6600")',
+      image: "@image()",
       category: '@pick(["电子产品", "服装", "食品", "家居"])',
       "sales|0-1000": 0,
       "rating|1-5": 4.5,
@@ -18,13 +18,20 @@ const productData = Mock.mock({
 });
 
 // 获取商品列表
-Mock.mock(/\/api\/products(\?.+)?$/, "get", () => {
-  // 这里可以处理分页、筛选等逻辑
+Mock.mock(/\/api\/products(\?.+)?$/, "get", (options) => {
+  // 处理分页逻辑
+  const url = new URL(options.url, "http://localhost");
+  const page = parseInt(url.searchParams.get("page")) || 1;
+  const pageSize = parseInt(url.searchParams.get("pageSize")) || 10;
+  // 计算分页数据
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize;
+  const paginatedItems = productData.list.slice(start, end);
   return {
     code: 200,
     data: {
       total: productData.list.length,
-      items: productData.list,
+      items: paginatedItems,
     },
     message: "获取成功",
   };
@@ -44,4 +51,5 @@ Mock.mock(/\/api\/products\/\d+/, "get", (options) => {
   };
 });
 
+export { productData };
 export default Mock;
