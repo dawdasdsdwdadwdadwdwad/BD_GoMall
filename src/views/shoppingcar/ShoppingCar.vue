@@ -1,17 +1,14 @@
 <template>
   <div class="shopping-cart-container">
     <h1 class="page-title">我的购物车</h1>
-
     <div v-if="loading" class="loading-container">
       <el-skeleton :rows="5" animated />
     </div>
-
     <div v-else-if="cartItems.length === 0" class="empty-cart">
       <i class="el-icon-shopping-cart-2 empty-icon"></i>
       <p>购物车是空的</p>
       <el-button type="primary" @click="$router.push('/')">去购物</el-button>
     </div>
-
     <template v-else>
       <el-table
         ref="cartTable"
@@ -20,7 +17,6 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55"></el-table-column>
-
         <el-table-column label="商品" width="400">
           <template slot-scope="scope">
             <div class="product-info">
@@ -31,7 +27,6 @@
             </div>
           </template>
         </el-table-column>
-
         <el-table-column label="单价" width="120">
           <template slot-scope="scope">
             <span class="price">¥{{ scope.row.product.price }}</span>
@@ -102,38 +97,38 @@
 </template>
 
 <script>
-import ShoppingCartApi from "@/api/ShoppingCart";
+import { mapState, mapGetters, mapActions } from "vuex";
 
 export default {
   name: "ShoppingCar",
   data() {
     return {
-      cartItems: [],
-      selectedItems: [],
       loading: true,
       userId: 1, // 模拟用户ID，实际应从用户状态获取
     };
   },
   computed: {
+    ...mapState("cart", ["cartItems", "selectedItems"]),
+    ...mapGetters("cart", ["getTotalPrice"]),
     totalPrice() {
-      return this.selectedItems.reduce((total, item) => {
-        return total + item.product.price * item.Quantity;
-      }, 0);
+      return this.getTotalPrice;
     },
   },
   created() {
     this.fetchCartItems();
   },
   methods: {
+    ...mapActions("cart", [
+      "fetchCartItems",
+      "updateCartItem",
+      "removeFromCart",
+      "clearCart",
+      "updateSelectedItems",
+    ]),
     async fetchCartItems() {
       this.loading = true;
       try {
-        const response = await ShoppingCartApi.getCart(this.userId);
-        if (response.data.code === 200) {
-          this.cartItems = response.data.data;
-        } else {
-          this.$message.error("获取购物车失败");
-        }
+        await this.$store.dispatch("cart/fetchCartItems", this.userId);
       } catch (error) {
         console.error("获取购物车出错:", error);
         this.$message.error("获取购物车出错");
@@ -144,16 +139,15 @@ export default {
 
     async updateQuantity(item, quantity) {
       try {
-        const response = await ShoppingCartApi.updateCartItem(
-          this.userId,
-          item.ProductID,
-          quantity
-        );
-
-        if (response.data.code === 200) {
+        const result = await this.updateCartItem({
+          userId: this.userId,
+          productId: item.ProductID,
+          quantity,
+        });
+        if (result) {
           this.$message.success("更新数量成功");
         } else {
-          this.$message.error(response.data.message || "更新数量失败");
+          this.$message.error("更新数量失败");
           // 恢复原数量
           this.fetchCartItems();
         }
@@ -166,16 +160,15 @@ export default {
 
     async removeItem(item) {
       try {
-        const response = await ShoppingCartApi.removeFromCart(
-          this.userId,
-          item.ProductID
-        );
+        const result = await this.removeFromCart({
+          userId: this.userId,
+          productId: item.ProductID,
+        });
 
-        if (response.data.code === 200) {
+        if (result) {
           this.$message.success("商品已从购物车移除");
-          this.fetchCartItems();
         } else {
-          this.$message.error(response.data.message || "移除商品失败");
+          this.$message.error("移除商品失败");
         }
       } catch (error) {
         console.error("移除商品出错:", error);
@@ -191,13 +184,14 @@ export default {
       })
         .then(async () => {
           try {
-            const response = await ShoppingCartApi.clearCart(this.userId);
-            if (response.data.code === 200) {
+            const result = await this.$store.dispatch(
+              "cart/clearCart",
+              this.userId
+            );
+            if (result) {
               this.$message.success("购物车已清空");
-              this.cartItems = [];
-              this.selectedItems = [];
             } else {
-              this.$message.error(response.data.message || "清空购物车失败");
+              this.$message.error("清空购物车失败");
             }
           } catch (error) {
             console.error("清空购物车出错:", error);
@@ -210,7 +204,7 @@ export default {
     },
 
     handleSelectionChange(selection) {
-      this.selectedItems = selection;
+      this.updateSelectedItems(selection);
     },
 
     selectAll() {
@@ -230,7 +224,10 @@ export default {
       })
         .then(async () => {
           const promises = this.selectedItems.map((item) => {
-            return ShoppingCartApi.removeFromCart(this.userId, item.ProductID);
+            return this.removeFromCart({
+              userId: this.userId,
+              productId: item.ProductID,
+            });
           });
 
           try {
@@ -256,7 +253,7 @@ export default {
 
       // 这里可以跳转到结算页面，或者调用结算API
       this.$message.success("正在前往结算页面...");
-      // this.$router.push('/checkout');
+      this.$router.push("/checkout");
     },
   },
 };
