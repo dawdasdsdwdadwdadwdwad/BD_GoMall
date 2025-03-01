@@ -15,6 +15,16 @@ const routes = [
     },
   },
   {
+    path: "/product/:id",
+    title: "商品详情",
+    component: () => import("../views/product/ProductDetail.vue"),
+    meta: {
+      requireAuth: false,
+      showHeader: true,
+      showFooter: true,
+    },
+  },
+  {
     path: "/login",
     title: "登录",
     component: () => import("../views/LoginAndRegister/LoginAccounts.vue"),
@@ -59,15 +69,26 @@ const routes = [
 const router = new VueRouter({
   mode: "hash",
   routes,
+  silentTransitionTo: true, //关闭警告
 });
 router.beforeEach((to, from, next) => {
   const token = Cookies.get("usertoken");
-  if (to.meta.requireAuth && !token) {
-    next("/login");
-  } else if (to.meta.requireAuth && token) {
-    next();
+  const requireAuth = to.meta.requireAuth;
+
+  if (requireAuth && !token) {
+    router.push("/login");
   } else {
-    next();
+    return next();
+  }
+});
+router.onError((err) => {
+  // 如果是重定向错误，可以忽略它
+  if (err.message.includes("Redirected when going from")) {
+    console.log("处理了导航重定向");
+    // 此处不需要额外处理，因为重定向已经发生
+  } else {
+    // 处理其他路由错误
+    console.error("路由错误:", err);
   }
 });
 export default router;

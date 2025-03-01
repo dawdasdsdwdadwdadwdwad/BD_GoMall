@@ -71,21 +71,23 @@ export default {
         if (valid) {
           login(this.loginForm)
             .then((response) => {
-              // console.log(response);
-              // console.log(response.data);
-              // console.log(response.data.data);
-              Cookies.set("usertoken", response.data.token, { expires: 1 });
-              this.$store.state.user.token = response.data.token;
+              const token = response.data.data.token;
+              this.$store.state.user.token = token;
+              Cookies.set("usertoken", token, { expires: 1 });
+
               this.$message.success("登录成功");
-              this.$router.push("/");
-              this.$store.state.user.token = response.data.data.token;
-              Cookies.set("usertoken", response.data.data.token, {
-                expires: 1,
-              });
+
+              // 检查是否有重定向地址
+              const redirect = this.$route.query.redirect;
+              if (redirect) {
+                this.$router.replace(redirect);
+              } else {
+                this.$router.push("/");
+              }
             })
             .catch((error) => {
               console.error("登录失败:", error);
-              this.$message.error("登录失败，请检查邮箱和密码");
+              this.$message.error("登录失败，请检查用户名和密码");
             });
         }
       });
