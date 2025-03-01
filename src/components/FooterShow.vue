@@ -31,5 +31,7 @@ export default {
   width: 100%;
   justify-content: space-around;
   border-top: 1px solid grey;
+  z-index: 1000;
+  background-color: #dcdfe6;
 }
 </style>
