@@ -24,6 +24,7 @@
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="saveProfile">保存修改</el-button>
+            <el-button type="danger" @click="logout">退出登录</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -32,6 +33,8 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
+
 export default {
   name: "ProfileShow",
   data() {
@@ -46,9 +49,28 @@ export default {
     };
   },
   methods: {
+    ...mapActions("cart", ["clearCart"]),
     saveProfile() {
       // TODO: 实现保存个人资料的逻辑
       this.$message.success("个人资料已更新");
+    },
+    async logout() {
+      try {
+        // 清除购物车数据
+        await this.$store.dispatch("cart/clearCart");
+        // 清除用户token
+        this.$store.dispatch("user/setToken", "");
+        // 清除cookie（如果有使用cookie存储token）
+        document.cookie =
+          "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+        // 提示用户
+        this.$message.success("已成功退出登录");
+        // 重定向到登录页面
+        this.$router.push("/login");
+      } catch (error) {
+        console.error("退出登录失败:", error);
+        this.$message.error("退出登录失败，请重试");
+      }
     },
   },
 };
